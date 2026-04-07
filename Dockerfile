@@ -37,4 +37,4 @@ ENV PORT=7860
 EXPOSE 7860
 
 # Default: run the web interface
-CMD ["python", "app.py"]
+CMD ["python", "server/app.py"]
