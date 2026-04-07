@@ -165,23 +165,7 @@ Plus bonuses for sustained suppression, penalties for unnecessary switches.
 # ─── Gradio Interface ─────────────────────────────────────────────────────────
 
 with gr.Blocks(
-    title="HIV Drug Sequencing RL Environment",
-    theme=gr.themes.Base(
-        primary_hue="emerald",
-        secondary_hue="teal",
-        neutral_hue="slate"
-    ),
-    css="""
-    .header-box { 
-        background: linear-gradient(135deg, #064e3b, #065f46); 
-        padding: 24px; border-radius: 12px; margin-bottom: 16px;
-        color: white;
-    }
-    .metric-box {
-        background: #f0fdf4; border: 1px solid #bbf7d0;
-        padding: 12px; border-radius: 8px; text-align: center;
-    }
-    """
+    title="HIV Drug Sequencing RL Environment"
 ) as demo:
 
     gr.HTML("""
@@ -233,8 +217,7 @@ with gr.Blocks(
             episode_log = gr.Textbox(
                 label="Episode Log",
                 lines=20,
-                max_lines=30,
-                show_copy_button=True
+                max_lines=30
             )
             episode_table = gr.DataFrame(
                 label="Step-by-Step Treatment History",
@@ -307,4 +290,23 @@ Keeping resistance low preserves future drug options.
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 7860))
-    demo.launch(server_name="0.0.0.0", server_port=port)
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=port,
+        theme=gr.themes.Base(
+            primary_hue="emerald",
+            secondary_hue="teal",
+            neutral_hue="slate"
+        ),
+        css="""
+        .header-box { 
+            background: linear-gradient(135deg, #064e3b, #065f46); 
+            padding: 24px; border-radius: 12px; margin-bottom: 16px;
+            color: white;
+        }
+        .metric-box {
+            background: #f0fdf4; border: 1px solid #bbf7d0;
+            padding: 12px; border-radius: 8px; text-align: center;
+        }
+        """
+    )
