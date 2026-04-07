@@ -1,3 +1,14 @@
+---
+title: HIV Drug Sequencing RL Environment
+emoji: 🧬
+colorFrom: green
+colorTo: teal
+sdk: docker
+app_port: 7860
+tags:
+  - openenv
+pinned: false
+---
 # 🧬 HIV Drug Sequencing RL Environment
 
 > **OpenEnv RL Challenge Submission** — Policy-Mixture Reinforcement Learning for HIV Treatment Sequencing
