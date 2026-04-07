@@ -13,7 +13,48 @@ import os
 import json
 import math
 import gradio as gr
+from fastapi import FastAPI
+from pydantic import BaseModel
+import uvicorn
 from environment import HIVDrugSequencingEnv, DRUG_COMBINATIONS, TaskGrader, HISTORICAL_PATIENTS
+
+app_api = FastAPI()
+global_env = None
+
+class ResetRequest(BaseModel):
+    task: str = "easy"
+    seed: int = 42
+
+class StepRequest(BaseModel):
+    action: int
+
+@app_api.post("/reset")
+def reset_endpoint(req: ResetRequest = None):
+    global global_env
+    if req is None: req = ResetRequest()
+    global_env = HIVDrugSequencingEnv(task=req.task, seed=req.seed)
+    obs = global_env.reset()
+    return obs.dict() if hasattr(obs, 'dict') else obs.model_dump()
+
+@app_api.post("/step")
+def step_endpoint(req: StepRequest):
+    global global_env
+    if global_env is None:
+        return {"error": "Environment not initialized"}
+    obs, reward, done, info = global_env.step(int(req.action))
+    return {
+        "observation": obs.dict() if hasattr(obs, 'dict') else obs.model_dump(),
+        "reward": reward,
+        "done": done,
+        "info": info.dict() if hasattr(info, 'dict') else info.model_dump()
+    }
+
+@app_api.get("/state")
+def state_endpoint():
+    global global_env
+    if global_env is None:
+         return {"error": "Environment not initialized"}
+    return global_env.state()
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -288,25 +329,8 @@ Keeping resistance low preserves future drug options.
     </div>
     """)
 
+app_api = gr.mount_gradio_app(app_api, demo, path="/")
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 7860))
-    demo.launch(
-        server_name="0.0.0.0",
-        server_port=port,
-        theme=gr.themes.Base(
-            primary_hue="emerald",
-            secondary_hue="teal",
-            neutral_hue="slate"
-        ),
-        css="""
-        .header-box { 
-            background: linear-gradient(135deg, #064e3b, #065f46); 
-            padding: 24px; border-radius: 12px; margin-bottom: 16px;
-            color: white;
-        }
-        .metric-box {
-            background: #f0fdf4; border: 1px solid #bbf7d0;
-            padding: 12px; border-radius: 8px; text-align: center;
-        }
-        """
-    )
+    uvicorn.run(app_api, host="0.0.0.0", port=port)
