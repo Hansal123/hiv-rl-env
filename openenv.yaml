@@ -1,0 +1,77 @@
+name: hiv-drug-sequencing
+version: "1.0.0"
+description: >
+  HIV Drug Sequencing RL Environment. An agent must learn optimal
+  antiretroviral therapy (ART) sequences for HIV+ patients by balancing
+  viral suppression, CD4 preservation, and resistance minimization.
+  Implements a Policy-Mixture approach: neighbour-guided decisions when
+  similar historical patients exist, model-based fallback otherwise.
+
+tags:
+  - openenv
+  - healthcare
+  - sequential-decision-making
+  - real-world
+  - hiv
+  - clinical-ai
+
+tasks:
+  - name: easy
+    description: Treatment-naive patient with moderate viral load (VL 1k-10k, CD4 350-600)
+    difficulty: easy
+    max_steps: 8
+    success_threshold: 0.5
+
+  - name: medium
+    description: Treatment-experienced patient with moderate resistance (VL 10k-100k, CD4 200-400)
+    difficulty: medium
+    max_steps: 10
+    success_threshold: 0.5
+
+  - name: hard
+    description: Multi-drug resistant HIV with advanced immunosuppression (VL 50k-500k, CD4 50-200)
+    difficulty: hard
+    max_steps: 12
+    success_threshold: 0.5
+
+observation_space:
+  type: structured
+  fields:
+    cd4_count: {type: float, description: "CD4 T-cell count (cells/mm³)"}
+    viral_load: {type: float, description: "HIV viral copies/mL"}
+    mutation_count: {type: int, description: "Resistance mutations accumulated"}
+    treatment_step: {type: int, description: "Current step in episode"}
+    current_drug_class: {type: str, description: "Drug class currently in use"}
+    resistance_flags: {type: dict, description: "Per-class resistance boolean flags"}
+    neighbour_available: {type: bool, description: "Whether a similar historical patient exists"}
+    neighbour_sequence: {type: list, nullable: true, description: "Drug sequence from nearest neighbour"}
+    days_on_current_regimen: {type: int, description: "Days on current drug regimen"}
+
+action_space:
+  type: discrete
+  n: 312
+  description: >
+    Index into 312 common drug combinations (20 ARV drugs forming
+    2-NRTI + 1 third-agent backbone combinations)
+
+reward:
+  type: continuous
+  range: [-20, 10]
+  description: >
+    Composite clinical reward based on published HIV RL literature:
+    r_t = -0.7*log(V_t) + 0.6*log(T_t) - 0.2*|M_t| when VL > 40
+    r_t = 5 + 0.6*log(T_t) - 0.2*|M_t| when VL ≤ 40 (suppressed)
+    Additional bonuses for sustained suppression, penalties for
+    unnecessary switches and resistance development.
+
+baseline_scores:
+  easy: 0.62
+  medium: 0.48
+  hard: 0.31
+  average: 0.47
+
+authors:
+  - name: HIV RL Research
+    email: research@example.com
+
+license: MIT
