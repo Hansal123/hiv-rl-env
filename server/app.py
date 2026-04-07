@@ -331,6 +331,9 @@ Keeping resistance low preserves future drug options.
 
 app_api = gr.mount_gradio_app(app_api, demo, path="/")
 
-if __name__ == "__main__":
+def main_server():
     port = int(os.getenv("PORT", 7860))
     uvicorn.run(app_api, host="0.0.0.0", port=port)
+
+if __name__ == "__main__":
+    main_server()
