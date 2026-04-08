@@ -472,7 +472,7 @@ class TaskGrader:
         Score: 0.0 to 1.0
         """
         if not history:
-            return 0.0
+            return 0.01
 
         suppressed_steps = sum(1 for h in history if h["viral_load"] < 400)
         final_vl = final_state.get("viral_load", 999999)
@@ -482,7 +482,8 @@ class TaskGrader:
         cd4_score = min(1.0, final_cd4 / 400)
         vl_bonus = 0.2 if final_vl < 400 else 0.0
 
-        return min(1.0, suppression_score * 0.5 + cd4_score * 0.3 + vl_bonus)
+        score = suppression_score * 0.5 + cd4_score * 0.3 + vl_bonus
+        return max(0.01, min(0.99, score))
 
     @staticmethod
     def grade_medium(history: list, final_state: dict) -> float:
@@ -493,7 +494,7 @@ class TaskGrader:
         - Tertiary: preserve CD4
         """
         if not history:
-            return 0.0
+            return 0.01
 
         final_vl = final_state.get("viral_load", 999999)
         final_cd4 = final_state.get("cd4", 0)
@@ -504,7 +505,8 @@ class TaskGrader:
         cd4_score = min(1.0, final_cd4 / 350)
         mutation_score = max(0, 1 - (final_mutations - initial_mutations) / 5)
 
-        return min(1.0, suppression_score * 0.5 + cd4_score * 0.25 + mutation_score * 0.25)
+        score = suppression_score * 0.5 + cd4_score * 0.25 + mutation_score * 0.25
+        return max(0.01, min(0.99, score))
 
     @staticmethod
     def grade_hard(history: list, final_state: dict) -> float:
@@ -516,7 +518,7 @@ class TaskGrader:
         - CD4 recovery is the gold standard
         """
         if not history:
-            return 0.0
+            return 0.01
 
         final_vl = final_state.get("viral_load", 999999)
         final_cd4 = final_state.get("cd4", 0)
@@ -530,4 +532,5 @@ class TaskGrader:
         preservation_score = min(1.0, classes_preserved / 3)
         recovery_score = 0.3 if cd4_recovered else 0.0
 
-        return min(1.0, suppression_score * 0.5 + preservation_score * 0.3 + recovery_score * 0.2)
+        score = suppression_score * 0.5 + preservation_score * 0.3 + recovery_score * 0.2
+        return max(0.01, min(0.99, score))
